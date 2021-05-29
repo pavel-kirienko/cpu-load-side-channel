@@ -47,6 +47,7 @@ static void emitByte(const std::uint8_t data)
     {
         const bool bit = (static_cast<std::uintmax_t>(data) & (1ULL << i)) != 0U;
         emitBit(bit);
+        std::printf(" ");
     }
     std::puts("");
 }
@@ -56,9 +57,10 @@ static void emitByte(const std::uint8_t data)
 static void emitFrameDelimiter()
 {
     std::printf("delimiter; ");
-    for (auto i = 0U; i < 9; i++)
+    for (auto i = 0U; i < 10; i++)
     {
         emitBit(0);
+        std::printf(" ");
     }
     std::puts("");
 }
@@ -80,7 +82,6 @@ static void emitPacket(const std::vector<std::uint8_t>& data)
 int main()
 {
     side_channel::initThread();
-    emitFrameDelimiter();  // Synchronize CDMA code to avoid losing the first packet
     emitPacket(std::vector<std::uint8_t>({1, 2, 3, 4, 5}));
     return 0;
 }
