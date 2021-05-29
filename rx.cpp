@@ -189,7 +189,7 @@ private:
     std::vector<CorrelationChannel> channels_;
 };
 
-/// Reads data from the channel bit-by-bit.
+/// Reads data from the channel bit-by-bit. May read garbage if there is no carrier.
 class BitReader
 {
 public:
@@ -201,22 +201,7 @@ public:
             const bool phy_state = readPHY();  // TODO FIXME PHASE CORRECT PHY READ
             const auto result = correlator_.feed(phy_state);
 
-            const bool synced = correlator_.isCodePhaseSynchronized();
-            if (synced != synced_)
-            {
-                synced_ = synced;
-                if (synced_)
-                {
-                    std::puts("SIGNAL ACQUIRED");
-                }
-                else
-                {
-                    std::puts("CARRIER LOST");
-                    continue;
-                }
-            }
-
-            if (synced_ && !clock_latch_ && result.clock > 0.0F)
+            if (!clock_latch_ && result.clock > 0.0F)
             {
                 clock_latch_ = true;
                 return result.data > 0.0F;
@@ -255,7 +240,6 @@ public:
 private:
     Correlator correlator_;
     bool clock_latch_ = false;
-    bool synced_ = false;
 };
 
 /// Reads symbols from the channel.
@@ -272,6 +256,7 @@ public:
         while (true)
         {
             const bool bit = bit_reader_.next();
+            std::printf("BIT %d\n", bit);
             if (remaining_bits_ >= 0)
             {
                 buffer_ = (buffer_ << 1U) | bit;
@@ -285,7 +270,7 @@ public:
             {
                 std::puts("START BIT");
                 consecutive_zeros_ = 0;
-                remaining_bits_ = 8;
+                remaining_bits_ = 7;
                 buffer_ = 0;
             }
             else  // Detect frame delimiter.
@@ -312,20 +297,18 @@ int main()
 {
     side_channel::initThread();
     SymbolReader reader;
-    BitReader bit_reader;
     while (true)
     {
-        std::printf("RX BIT %d\n", bit_reader.next());
-//         const auto symbol = reader.next();
-//         if (std::holds_alternative<SymbolReader::Delimiter>(symbol))
-//         {
-//             std::printf("DELIMITER\n");
-//         }
-//         else
-//         {
-//             const auto byte = std::get<std::uint8_t>(symbol);
-//             std::printf("0x%02x\n", byte);
-//         }
+        const auto symbol = reader.next();
+        if (std::holds_alternative<SymbolReader::Delimiter>(symbol))
+        {
+            std::puts("FRAME DELIMITER");
+        }
+        else
+        {
+            const auto byte = std::get<std::uint8_t>(symbol);
+            std::printf("0x%02x\n", byte);
+        }
     }
     return 0;
 }

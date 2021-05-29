@@ -43,6 +43,7 @@ static void emitByte(const std::uint8_t data)
     auto i = sizeof(data) * 8U;
     std::printf("byte 0x%02x; ", data);
     emitBit(1); // START BIT
+    std::printf(" ");
     while (i --> 0)
     {
         const bool bit = (static_cast<std::uintmax_t>(data) & (1ULL << i)) != 0U;
