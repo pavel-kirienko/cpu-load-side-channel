@@ -42,16 +42,45 @@ static bool readPHY()
     static auto deadline = std::chrono::steady_clock::now();
     deadline += SampleDuration;
     const auto started_at = std::chrono::steady_clock::now();
-    std::int64_t counter = 0;
-    while (std::chrono::steady_clock::now() < deadline)
+
+    // Run counter threads to measure ticks per unit time.
+    std::vector<std::int64_t> counters;
+    const auto loop = [&counters](std::uint32_t index) {
+        auto& cnt = counters.at(index);
+        while (std::chrono::steady_clock::now() < deadline)
+        {
+            cnt++;
+        }
+    };
+    const auto thread_count = std::min<unsigned>(MAX_CONCURRENCY, std::thread::hardware_concurrency());
+    if (thread_count > 1U)
     {
-        counter++;
+        counters.resize(thread_count, 0);
+        std::vector<std::thread> pool;
+        for (auto i = 0U; i < thread_count; i++)
+        {
+            pool.emplace_back(loop, i);
+        }
+        for (auto& t : pool)
+        {
+            t.join();
+        }
     }
+    else  // Otherwise run in the main thread to take advantage of the CPU core affinity.
+    {
+        counters.push_back(0);
+        loop(0);
+    }
+
+    // Estimate the tick rate.
     const double elapsed_ns =
         std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - started_at).count();
-    const double rate = double(counter) / elapsed_ns;
+    const double rate = double(std::accumulate(std::begin(counters), std::end(counters), 0)) / elapsed_ns;
+
+    // Apply high-pass filtering to eliminate DC component.
     static double rate_average = rate;
     rate_average += (rate - rate_average) / PHYAveragingFactor;
+
     // A smaller counter value means that the CPU time is being consumed by the sender, meaning it's the high level.
     return rate < rate_average;
 }

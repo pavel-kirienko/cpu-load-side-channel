@@ -8,6 +8,13 @@
 #include <cstdint>
 #include <pthread.h>
 
+/// The transmitter can modulate load on all available cores to traverse virtualization boundaries that implement
+/// non-direct CPU core mapping (e.g., virtual core X may be mapped to physical core Y such that X!=Y).
+/// This is usually not necessary outside of virtualized environments, in which case only 0th core should be used.
+#ifndef MAX_CONCURRENCY
+#   define MAX_CONCURRENCY 999
+#endif
+
 namespace side_channel
 {
 

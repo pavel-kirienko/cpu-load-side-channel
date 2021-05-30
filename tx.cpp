@@ -8,14 +8,6 @@
 #include <thread>
 #include <vector>
 
-/// The transmitter can modulate load on all available cores to traverse virtualization boundaries that implement
-/// non-direct CPU core mapping (e.g., virtual core X may be mapped to physical core Y such that X!=Y).
-/// This is usually not necessary though, modulating the 0th core only should be sufficient.
-#ifndef MAX_CONCURRENCY
-#   define MAX_CONCURRENCY 1
-#endif
-
-
 static void drivePHY(const bool level, const std::chrono::nanoseconds duration)
 {
     // Use delta relative to fixed state to avoid accumulation of phase error, because phase error attenuates the
