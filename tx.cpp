@@ -140,6 +140,6 @@ int main(const int argc, const char* const argv[])
     side_channel::initThread();
     const auto data = readFile(argv[1]);
     std::cerr << "Transmitting " << data.size() << " bytes read from " << argv[1] << std::endl;
-    emitPacket(std::vector<std::uint8_t>({1, 2, 3}));
+    emitPacket(data);
     return 0;
 }
