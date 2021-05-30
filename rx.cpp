@@ -1,6 +1,6 @@
 /// Pavel Kirienko <pavel@uavcan.org>
 /// Distributed under the terms of the MIT license.
-/// g++ -lpthread -std=c++17 -O2 -Wall rx.cpp -o rx && ./rx
+/// g++ -std=c++17 -O2 -Wall rx.cpp -lpthread -o rx && ./rx
 
 #include "side_channel_params.hpp"
 #include <cstdio>
