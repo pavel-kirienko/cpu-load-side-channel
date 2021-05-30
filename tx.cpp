@@ -5,10 +5,13 @@
 #include "side_channel_params.hpp"
 #include <cstdio>
 #include <iostream>
+#include <fstream>
+#include <iterator>
 #include <thread>
 #include <vector>
 #include <atomic>
 #include <cassert>
+#include <stdexcept>
 
 static void drivePHY(const bool level, const std::chrono::nanoseconds duration)
 {
@@ -109,9 +112,32 @@ static void emitPacket(const std::vector<std::uint8_t>& data)
     emitFrameDelimiter();
 }
 
-int main()
+static std::vector<std::uint8_t> readFile(const std::string& path)
 {
+    std::ifstream ifs(path, std::ios::binary);
+    if (ifs)
+    {
+        ifs.unsetf(std::ios::skipws);
+        ifs.seekg(0, std::ios::end);
+        std::vector<std::uint8_t> buf;
+        buf.reserve(ifs.tellg());
+        ifs.seekg(0, std::ios::beg);
+        buf.insert(buf.begin(), std::istream_iterator<std::uint8_t>(ifs), std::istream_iterator<std::uint8_t>());
+        return buf;
+    }
+    throw std::logic_error("Cannot read file " + path);
+}
+
+int main(const int argc, const char* const argv[])
+{
+    if (argc < 2)
+    {
+        std::cerr << "Usage:\n\t" << argv[0] << " <file>" << std::endl;
+        return 1;
+    }
     side_channel::initThread();
+    const auto data = readFile(argv[1]);
+    std::cerr << "Transmitting " << data.size() << " bytes read from " << argv[1] << std::endl;
     emitPacket(std::vector<std::uint8_t>({1, 2, 3}));
     return 0;
 }
