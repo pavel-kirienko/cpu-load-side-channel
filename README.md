@@ -1,8 +1,20 @@
-# Inter-process or cross-VM data exchange via CPU load modulation
+## Inter-process or cross-VM data exchange via CPU load modulation
 
-## Principle
+### What is this
 
-This PoC demonstrates a straightforward side-channel attack that allows one to construct reasonably robust
+This is not a vulnerability and, generally, not an infosec threat on its own.
+
+I made this PoC as a visual aid for an online discussion about [M1RACLES](https://m1racles.com/) ---
+a method of covert inter-process data exchange via a system register in Apple M1.
+The point is to demonstrate that said register does not add new means of data exchange,
+since any set of processes executed on the same physical host necessarily share the underlying hardware resources,
+which can be exploited for covert data exchange (proper modulation provided).
+
+In the best spirit of "[someone is wrong on the internet](https://xkcd.com/386/)", I made this demo to prove the point.
+
+### Principle
+
+This PoC demonstrates a straightforward side-channel that allows one to construct reasonably robust
 data links between multiple processes, possibly executed in different virtualized environments,
 by modulating the CPU load or altering the state of any other shared hardware resource (such as CPU caches).
 
@@ -39,10 +51,10 @@ the boundaries of virtualized environments.
 The speed vs. bit error rate trade-off can be adjusted by updating the chip period and the code length
 defined in the header file.
 
-## Demo
+### Demo
 
 [![video](https://img.youtube.com/vi/PIUOHklFjrQ/maxresdefault.jpg)](https://youtu.be/PIUOHklFjrQ)
 
-## Building
+### Building
 
 The build instructions are given at the top of each file.
