@@ -372,12 +372,12 @@ int main()
     while (true)
     {
         const auto packet = reader.next();
-        std::printf("received valid packet: ");
+        std::printf("\033[91m" "received valid packet: ");
         for (std::uint8_t byte : packet)
         {
             std::printf("%02x ", byte);
         }
-        std::puts("");
+        std::puts("\033[m");
     }
     return 0;
 }
