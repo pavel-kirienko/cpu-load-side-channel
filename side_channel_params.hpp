@@ -1,3 +1,6 @@
+/// Pavel Kirienko <pavel@uavcan.org>
+/// Distributed under the terms of the MIT license.
+
 #pragma once
 
 #include <chrono>
