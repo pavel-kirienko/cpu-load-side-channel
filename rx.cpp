@@ -231,7 +231,7 @@ public:
             }
             else
             {
-                std::printf(" ");
+                std::printf(".");
             }
         }
         std::puts("");
@@ -256,7 +256,8 @@ public:
         while (true)
         {
             const bool bit = bit_reader_.next();
-            std::printf("BIT %d\n", bit);
+            std::printf("bit %d\n", bit);
+            bit_reader_.printDiagnostics();
             if (remaining_bits_ >= 0)
             {
                 buffer_ = (buffer_ << 1U) | bit;
@@ -268,7 +269,6 @@ public:
             }
             else if (bit)  // Detect start bit.
             {
-                std::puts("START BIT");
                 consecutive_zeros_ = 0;
                 remaining_bits_ = 7;
                 buffer_ = 0;
@@ -319,7 +319,7 @@ private:
     public:
         std::optional<std::vector<std::uint8_t>> operator()(const SymbolReader::Delimiter&)
         {
-            std::puts("FRAME DELIMITER");
+            std::puts("frame delimiter");
             std::optional<std::vector<std::uint8_t>> result;
             if (buffer_.size() >= 2)
             {
@@ -336,7 +336,7 @@ private:
                 }
                 else
                 {
-                    std::puts("CRC ERROR");
+                    std::puts("crc error");
                 }
             }
             buffer_.clear();
@@ -345,7 +345,7 @@ private:
 
         std::optional<std::vector<std::uint8_t>> operator()(const std::uint8_t data)
         {
-            std::printf("DATA BYTE 0x%02x\n", data);
+            std::printf("byte 0x%02x\n", data);
             buffer_.push_back(data);
             return {};
         }
@@ -365,7 +365,7 @@ int main()
     while (true)
     {
         const auto packet = reader.next();
-        std::printf("RX PACKET: ");
+        std::printf("received valid packet: ");
         for (std::uint8_t byte : packet)
         {
             std::printf("%02x ", byte);
