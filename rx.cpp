@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <sstream>
 #include <fstream>
+#include <iostream>
 #include <thread>
 #include <vector>
 #include <type_traits>
@@ -402,6 +403,8 @@ private:
 
 int main()
 {
+    std::cout << "SPREAD CODE LENGTH: " << side_channel::params::CDMACodeLength << " bit" << std::endl;
+    std::cout << "SPREAD CHIP PERIOD: " << side_channel::params::ChipPeriod.count() * 1e-6 << " ms" << std::endl;
     side_channel::initThread();
     PacketReader reader;
     while (true)

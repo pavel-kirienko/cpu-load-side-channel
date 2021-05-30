@@ -130,6 +130,8 @@ static std::vector<std::uint8_t> readFile(const std::string& path)
 
 int main(const int argc, const char* const argv[])
 {
+    std::cout << "SPREAD CODE LENGTH: " << side_channel::params::CDMACodeLength << " bit" << std::endl;
+    std::cout << "SPREAD CHIP PERIOD: " << side_channel::params::ChipPeriod.count() * 1e-6 << " ms" << std::endl;
     if (argc < 2)
     {
         std::cerr << "Usage:\n\t" << argv[0] << " <file>" << std::endl;
