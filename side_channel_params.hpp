@@ -41,7 +41,7 @@ namespace params
 {
 
 /// One bit of the raw signal takes this much time to transmit.
-static constexpr std::chrono::milliseconds BitPeriod{100};
+static constexpr std::chrono::nanoseconds BitPeriod{100'000'000};
 
 /// The pseudorandom CDMA spread code unique to this TX/RX pair.
 /// In this example we use a subsequence of the 1023-bit Gold code for GPS SV#1.

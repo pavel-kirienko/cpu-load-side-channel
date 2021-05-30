@@ -33,16 +33,23 @@ inline std::pair<S, S> computeMeanStdev(const std::vector<S>& cvec)
 /// Returns true if the PHY is driven high by the transmitter, false otherwise.
 static bool readPHY()
 {
+    // Use delta relative to fixed state to avoid accumulation of phase error, because phase error attenuates the
+    // useful signal at the receiver. TODO: Implement automatic frequency alignment via PLL
+    static auto deadline = std::chrono::steady_clock::now();
+    deadline += SampleDuration;
+    const auto started_at = std::chrono::steady_clock::now();
     std::int64_t counter = 0;
-    const auto deadline = std::chrono::steady_clock::now() + SampleDuration;
     while (std::chrono::steady_clock::now() < deadline)
     {
         counter++;
     }
-    static std::int64_t counter_average = counter;
-    counter_average += (counter - counter_average) / PHYAveragingFactor;
+    const double elapsed_ns =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - started_at).count();
+    const double rate = double(counter) / elapsed_ns;
+    static double rate_average = rate;
+    rate_average += (rate - rate_average) / PHYAveragingFactor;
     // A smaller counter value means that the CPU time is being consumed by the sender, meaning it's the high level.
-    return counter < counter_average;
+    return rate < rate_average;
 }
 
 /// Estimates correlation of the real-time input signal against the reference CDMA spread code (chip code).
@@ -198,7 +205,7 @@ public:
     {
         for (;;)
         {
-            const bool phy_state = readPHY();  // TODO FIXME PHASE CORRECT PHY READ
+            const bool phy_state = readPHY();
             const auto result = correlator_.feed(phy_state);
 
             if (!clock_latch_ && result.clock > 0.0F)

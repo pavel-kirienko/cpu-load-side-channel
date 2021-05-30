@@ -6,11 +6,15 @@
 #include <vector>
 
 
-static void drivePHY(const bool level, const std::chrono::microseconds duration)
+static void drivePHY(const bool level, const std::chrono::nanoseconds duration)
 {
+    // Use delta relative to fixed state to avoid accumulation of phase error, because phase error attenuates the
+    // useful signal at the receiver.
+    static auto deadline = std::chrono::steady_clock::now();
+    deadline += duration;
+    //std::printf("%ld %ld\n", deadline.time_since_epoch().count(), std::chrono::steady_clock::now().time_since_epoch().count());
     if (level)
     {
-        const auto deadline = std::chrono::steady_clock::now() + duration;
         while (std::chrono::steady_clock::now() < deadline)
         {
             (void) 0;   // This busyloop is only needed to generate dummy CPU load.
@@ -18,7 +22,7 @@ static void drivePHY(const bool level, const std::chrono::microseconds duration)
     }
     else
     {
-        std::this_thread::sleep_for(duration);
+        std::this_thread::sleep_for(deadline - std::chrono::steady_clock::now());
     }
 }
 
@@ -53,7 +57,7 @@ static void emitByte(const std::uint8_t data)
 static void emitFrameDelimiter()
 {
     std::printf("delimiter\n");
-    for (auto i = 0U; i < 16; i++)
+    for (auto i = 0U; i < 20; i++)
     {
         emitBit(0);
     }
