@@ -8,8 +8,6 @@
 
 static void drivePHY(const bool level, const std::chrono::microseconds duration)
 {
-    std::printf("%d", level);
-    fflush(stdout);
     if (level)
     {
         const auto deadline = std::chrono::steady_clock::now() + duration;
@@ -41,29 +39,24 @@ static void emitBit(const bool value)
 static void emitByte(const std::uint8_t data)
 {
     auto i = sizeof(data) * 8U;
-    std::printf("byte 0x%02x; ", data);
+    std::printf("byte 0x%02x\n", data);
     emitBit(1); // START BIT
-    std::printf(" ");
     while (i --> 0)
     {
         const bool bit = (static_cast<std::uintmax_t>(data) & (1ULL << i)) != 0U;
         emitBit(bit);
-        std::printf(" ");
     }
-    std::puts("");
 }
 
 /// The delimiter shall be at least 9 zero bits long (longer is ok).
 /// Longer delimiter allows the reciever to find correlation before the data transmission is started.
 static void emitFrameDelimiter()
 {
-    std::printf("delimiter; ");
-    for (auto i = 0U; i < 10; i++)
+    std::printf("delimiter\n");
+    for (auto i = 0U; i < 16; i++)
     {
         emitBit(0);
-        std::printf(" ");
     }
-    std::puts("");
 }
 
 static void emitPacket(const std::vector<std::uint8_t>& data)
@@ -83,6 +76,6 @@ static void emitPacket(const std::vector<std::uint8_t>& data)
 int main()
 {
     side_channel::initThread();
-    emitPacket(std::vector<std::uint8_t>({1, 2, 3, 4, 5}));
+    emitPacket(std::vector<std::uint8_t>({1, 2, 3}));
     return 0;
 }

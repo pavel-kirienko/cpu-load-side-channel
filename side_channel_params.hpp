@@ -41,7 +41,7 @@ namespace params
 {
 
 /// One bit of the raw signal takes this much time to transmit.
-static constexpr std::chrono::milliseconds BitPeriod{100};
+static constexpr std::chrono::milliseconds BitPeriod{64};
 
 /// The pseudorandom CDMA code unique to this transmitter. Should be shared between TX and RX.
 /// Longer code improves SNR. Shorter code increases the data rate.

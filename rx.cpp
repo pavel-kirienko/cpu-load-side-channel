@@ -293,22 +293,84 @@ private:
     std::int8_t   remaining_bits_ = -1;
 };
 
+/// Reads full data packets from the channel.
+/// Packets are delimited using the delimiter symbol and contain CRC-16-CCITT at the end (big endian; residue zero).
+class PacketReader
+{
+    template <class Visitor, class... Variants>
+    friend constexpr auto visit( Visitor&& vis, Variants&&... vars );
+
+public:
+    std::vector<std::uint8_t> next()
+    {
+        while (true)
+        {
+            const auto sym = symbol_reader_.next();
+            if (const auto ret = std::visit(assembler_, sym))
+            {
+                return *ret;
+            }
+        }
+    }
+
+private:
+    class FrameAssembler
+    {
+    public:
+        std::optional<std::vector<std::uint8_t>> operator()(const SymbolReader::Delimiter&)
+        {
+            std::puts("FRAME DELIMITER");
+            std::optional<std::vector<std::uint8_t>> result;
+            if (buffer_.size() >= 2)
+            {
+                std::uint16_t crc = side_channel::CRCInitial;
+                for (std::uint8_t v : buffer_)
+                {
+                    crc = side_channel::crcAdd(crc, v);
+                }
+                if (0 == crc)
+                {
+                    buffer_.pop_back();  // Drop the CRC from the end.
+                    buffer_.pop_back();
+                    result.emplace(buffer_);
+                }
+                else
+                {
+                    std::puts("CRC ERROR");
+                }
+            }
+            buffer_.clear();
+            return result;
+        }
+
+        std::optional<std::vector<std::uint8_t>> operator()(const std::uint8_t data)
+        {
+            std::printf("DATA BYTE 0x%02x\n", data);
+            buffer_.push_back(data);
+            return {};
+        }
+
+    private:
+        std::vector<std::uint8_t> buffer_;
+    };
+
+    SymbolReader symbol_reader_;
+    FrameAssembler assembler_;
+};
+
 int main()
 {
     side_channel::initThread();
-    SymbolReader reader;
+    PacketReader reader;
     while (true)
     {
-        const auto symbol = reader.next();
-        if (std::holds_alternative<SymbolReader::Delimiter>(symbol))
+        const auto packet = reader.next();
+        std::printf("RX PACKET: ");
+        for (std::uint8_t byte : packet)
         {
-            std::puts("FRAME DELIMITER");
+            std::printf("%02x ", byte);
         }
-        else
-        {
-            const auto byte = std::get<std::uint8_t>(symbol);
-            std::printf("0x%02x\n", byte);
-        }
+        std::puts("");
     }
     return 0;
 }
