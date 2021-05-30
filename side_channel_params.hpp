@@ -49,13 +49,13 @@ namespace params
 /// although it does make the data link somewhat unstable outside of ideal conditions.
 /// Values ca. 100 ms enable robust communication under adverse conditions.
 /// Increasing the spread code length also improves the SNR.
-static constexpr std::chrono::nanoseconds BitPeriod{64'000'000};
+static constexpr std::chrono::nanoseconds BitPeriod{32'000'000};
 
 /// The pseudorandom CDMA spread code unique to this TX/RX pair.
 /// In this example we use a subsequence of the 1023-bit Gold code for GPS SV#1.
 /// Helpful resource: https://natronics.github.io/blag/2014/gps-prn/
-static constexpr auto CMDACodeLength = 128U;
-static std::bitset<CMDACodeLength> CDMACode(
+static constexpr auto CDMACodeLength = 1023U;
+static std::bitset<CDMACodeLength> CDMACode(
     "1100100000111001010010011110010100010011111010101101000100010101"
     "0101100100011110100111111011011100110111110010101010000100000000"
     "1110101001000100110111100000111101011100110011110110000000101111"

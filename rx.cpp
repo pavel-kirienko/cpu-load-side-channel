@@ -128,7 +128,7 @@ private:
 
 class Correlator
 {
-    static constexpr auto SequenceLength = side_channel::params::CMDACodeLength * OversamplingFactor;
+    static constexpr auto SequenceLength = side_channel::params::CDMACodeLength * OversamplingFactor;
 
 public:
     /// The clock is recovered from the spread code along with the data.
@@ -229,7 +229,7 @@ public:
     {
         const auto cvec = correlator_.getCorrelationVector();
         const auto [mean, stdev] = computeMeanStdev(cvec);
-        std::printf("\rmean=%.2f max=%.2f stdev=%.2f lock=%d | ",
+        std::printf("mean=%.2f max=%.2f stdev=%.2f lock=%d | ",
                     mean,
                     *std::max_element(std::begin(cvec), std::end(cvec)),
                     stdev,
@@ -245,7 +245,7 @@ public:
                 std::printf(".");
             }
         }
-        std::printf("\r");
+        std::printf("\n");
         fflush(stdout);
     }
 
@@ -268,7 +268,7 @@ public:
         while (true)
         {
             const bool bit = bit_reader_.next();
-            //std::printf("bit %d\n", bit);
+            std::printf("bit %d\n", bit);
             bit_reader_.printDiagnostics();
             if (remaining_bits_ >= 0)
             {
