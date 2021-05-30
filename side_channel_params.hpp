@@ -20,11 +20,13 @@ namespace side_channel
 
 inline void initThread()
 {
+#if MAX_CONCURRENCY == 1
     // Force affinity with the 0th core.
     cpu_set_t cpuset{};
     CPU_ZERO(&cpuset);
     CPU_SET(0, &cpuset);
     (void)pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+#endif
 }
 
 static constexpr std::uint16_t CRCInitial = 0xFFFFU;

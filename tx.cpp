@@ -7,6 +7,8 @@
 #include <iostream>
 #include <thread>
 #include <vector>
+#include <atomic>
+#include <cassert>
 
 static void drivePHY(const bool level, const std::chrono::nanoseconds duration)
 {
@@ -16,10 +18,11 @@ static void drivePHY(const bool level, const std::chrono::nanoseconds duration)
     deadline += duration;
     if (level)
     {
-        const auto loop = []() {
-            while (std::chrono::steady_clock::now() < deadline)
+        std::atomic<bool> finish = false;
+        const auto loop = [&finish]() {
+            while (!finish)
             {
-                // This busyloop is only needed to generate dummy CPU load between possibly blocking calls to now().
+                // This busyloop is only needed to generate dummy CPU load between possibly contentious checks.
                 volatile std::uint16_t i = 1;
                 while (i != 0)
                 {
@@ -27,22 +30,26 @@ static void drivePHY(const bool level, const std::chrono::nanoseconds duration)
                 }
             }
         };
-        const auto thread_count = std::min<unsigned>(MAX_CONCURRENCY, std::thread::hardware_concurrency());
-        if (thread_count > 1U)
+        static const auto thread_count = std::max<unsigned>(1, std::min<unsigned>(MAX_CONCURRENCY,
+                                                                                  std::thread::hardware_concurrency()));
+        std::vector<std::thread> pool;
+        assert(thread_count > 0);
+        for (auto i = 0U; i < (thread_count - 1); i++)
         {
-            std::vector<std::thread> pool;
-            for (auto i = 0U; i < thread_count; i++)
+            pool.emplace_back(loop);
+        }
+        while (std::chrono::steady_clock::now() < deadline)
+        {
+            volatile std::uint16_t i = 1;  // Dummy load in case now() is blocking.
+            while (i != 0)
             {
-                pool.emplace_back(loop);
-            }
-            for (auto& t : pool)
-            {
-                t.join();
+                i = i + 1U;
             }
         }
-        else
+        finish = true;
+        for (auto& t : pool)
         {
-            loop();
+            t.join();
         }
     }
     else

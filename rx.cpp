@@ -52,7 +52,8 @@ static bool readPHY()
             cnt++;
         }
     };
-    const auto thread_count = std::min<unsigned>(MAX_CONCURRENCY, std::thread::hardware_concurrency());
+    static const auto thread_count = std::max<unsigned>(1, std::min<unsigned>(MAX_CONCURRENCY,
+                                                                              std::thread::hardware_concurrency()));
     if (thread_count > 1U)
     {
         counters.resize(thread_count, 0);
