@@ -43,13 +43,13 @@ inline std::uint16_t crcAdd(const std::uint16_t crc, const uint8_t byte)
 namespace params
 {
 
-/// One bit of the raw signal takes this much time to transmit.
+/// One chip of the raw signal takes this much time to transmit.
 /// Accurate timing is absolutely essential for reliability of the data link.
 /// It is possible to go as low as 1 millisecond and possibly lower, resulting in very high throughput,
 /// although it does make the data link somewhat unstable outside of ideal conditions.
 /// Values ca. 100 ms enable robust communication under adverse conditions.
 /// Increasing the spread code length also improves the SNR.
-static constexpr std::chrono::nanoseconds BitPeriod{32'000'000};
+static constexpr std::chrono::nanoseconds ChipPeriod{32'000'000};
 
 /// The pseudorandom CDMA spread code unique to this TX/RX pair.
 /// In this example we use a subsequence of the 1023-bit Gold code for GPS SV#1.

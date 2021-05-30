@@ -61,14 +61,14 @@ static void drivePHY(const bool level, const std::chrono::nanoseconds duration)
 
 static void emitBit(const bool value)
 {
-    using side_channel::params::BitPeriod;
+    using side_channel::params::ChipPeriod;
     using side_channel::params::CDMACode;
 
     for (auto i = 0U; i < CDMACode.size(); i++)
     {
         const bool code_position = CDMACode[i];
         const bool bit = value ? code_position : !code_position;
-        drivePHY(bit, BitPeriod);
+        drivePHY(bit, ChipPeriod);
     }
 }
 

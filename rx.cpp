@@ -18,7 +18,7 @@
 #include <cmath>
 
 static constexpr auto OversamplingFactor = 3;
-static constexpr auto SampleDuration = side_channel::params::BitPeriod / OversamplingFactor;
+static constexpr auto SampleDuration = side_channel::params::ChipPeriod / OversamplingFactor;
 static constexpr auto PHYAveragingFactor = 8;
 
 /// Compute mean and standard deviation for the set.
