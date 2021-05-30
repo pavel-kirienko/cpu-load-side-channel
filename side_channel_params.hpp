@@ -58,7 +58,7 @@ namespace params
 /// although it does make the data link somewhat unstable outside of ideal conditions.
 /// Values ca. 100 ms enable robust communication under adverse conditions.
 /// Increasing the spread code length also improves the SNR.
-static constexpr std::chrono::nanoseconds ChipPeriod{32'000'000};
+static constexpr std::chrono::nanoseconds ChipPeriod{16'000'000};
 
 /// The pseudorandom CDMA spread code unique to this TX/RX pair.
 /// In this example we use a subsequence of the 1023-bit Gold code for GPS SV#1.
