@@ -4,8 +4,16 @@
 
 #include "side_channel_params.hpp"
 #include <cstdio>
+#include <iostream>
 #include <thread>
 #include <vector>
+
+/// The transmitter can modulate load on all available cores to traverse virtualization boundaries that implement
+/// non-direct CPU core mapping (e.g., virtual core X may be mapped to physical core Y such that X!=Y).
+/// This is usually not necessary though, modulating the 0th core only should be sufficient.
+#ifndef MAX_CONCURRENCY
+#   define MAX_CONCURRENCY 1
+#endif
 
 
 static void drivePHY(const bool level, const std::chrono::nanoseconds duration)
@@ -14,12 +22,35 @@ static void drivePHY(const bool level, const std::chrono::nanoseconds duration)
     // useful signal at the receiver.
     static auto deadline = std::chrono::steady_clock::now();
     deadline += duration;
-    //std::printf("%ld %ld\n", deadline.time_since_epoch().count(), std::chrono::steady_clock::now().time_since_epoch().count());
     if (level)
     {
-        while (std::chrono::steady_clock::now() < deadline)
+        const auto loop = []() {
+            while (std::chrono::steady_clock::now() < deadline)
+            {
+                // This busyloop is only needed to generate dummy CPU load between possibly blocking calls to now().
+                volatile std::uint16_t i = 1;
+                while (i != 0)
+                {
+                    i = i + 1U;
+                }
+            }
+        };
+        const auto thread_count = std::min<unsigned>(MAX_CONCURRENCY, std::thread::hardware_concurrency());
+        if (thread_count > 1U)
         {
-            (void) 0;   // This busyloop is only needed to generate dummy CPU load.
+            std::vector<std::thread> pool;
+            for (auto i = 0U; i < thread_count; i++)
+            {
+                pool.emplace_back(loop);
+            }
+            for (auto& t : pool)
+            {
+                t.join();
+            }
+        }
+        else
+        {
+            loop();
         }
     }
     else
