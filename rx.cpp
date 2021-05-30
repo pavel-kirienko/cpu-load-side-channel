@@ -2,6 +2,8 @@
 
 #include "side_channel_params.hpp"
 #include <cstdio>
+#include <sstream>
+#include <fstream>
 #include <thread>
 #include <vector>
 #include <type_traits>
@@ -225,7 +227,7 @@ public:
     {
         const auto cvec = correlator_.getCorrelationVector();
         const auto [mean, stdev] = computeMeanStdev(cvec);
-        std::printf("mean=%.2f max=%.2f stdev=%.2f lock=%d | ",
+        std::printf("\rmean=%.2f max=%.2f stdev=%.2f lock=%d | ",
                     mean,
                     *std::max_element(std::begin(cvec), std::end(cvec)),
                     stdev,
@@ -241,7 +243,8 @@ public:
                 std::printf(".");
             }
         }
-        std::puts("");
+        std::printf("\r");
+        fflush(stdout);
     }
 
 private:
@@ -263,7 +266,7 @@ public:
         while (true)
         {
             const bool bit = bit_reader_.next();
-            std::printf("bit %d\n", bit);
+            //std::printf("bit %d\n", bit);
             bit_reader_.printDiagnostics();
             if (remaining_bits_ >= 0)
             {
@@ -326,7 +329,7 @@ private:
     public:
         std::optional<std::vector<std::uint8_t>> operator()(const SymbolReader::Delimiter&)
         {
-            std::puts("frame delimiter");
+            //std::puts("frame delimiter");
             std::optional<std::vector<std::uint8_t>> result;
             if (buffer_.size() >= 2)
             {
@@ -352,7 +355,7 @@ private:
 
         std::optional<std::vector<std::uint8_t>> operator()(const std::uint8_t data)
         {
-            std::printf("byte 0x%02x\n", data);
+            //std::printf("byte 0x%02x\n", data);
             buffer_.push_back(data);
             return {};
         }
@@ -372,12 +375,23 @@ int main()
     while (true)
     {
         const auto packet = reader.next();
-        std::printf("\033[91m" "received valid packet: ");
-        for (std::uint8_t byte : packet)
+
+        std::ostringstream file_name;
+        file_name << std::chrono::system_clock::now().time_since_epoch().count() << ".bin";
+        if (std::ofstream out_file(file_name.str(), std::ios::binary | std::ios::out); out_file)
         {
-            std::printf("%02x ", byte);
+            out_file.write(reinterpret_cast<const char*>(packet.data()), packet.size());
+            out_file.close();
         }
-        std::puts("\033[m");
+        else
+        {
+            std::printf("Could not open file %s\n", file_name.str().c_str());
+            return 1;
+        }
+        std::printf("\033[91m"
+                    "received valid packet of %u bytes saved into file %s\n"
+                    "\033[m",
+                    static_cast<unsigned>(packet.size()), file_name.str().c_str());
     }
     return 0;
 }
