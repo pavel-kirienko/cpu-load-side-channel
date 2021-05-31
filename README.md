@@ -41,6 +41,8 @@ e.g., random variations of the processing load on the host generally do not caus
 The correlator also performs clock recovery in a similar manner
 by computing a weighted sum of the code phase from each channel.
 
+<img src="/figures/rx.png" alt="RX pipeline">
+
 Any given system may host a theoretically unlimited number of such data links
 provided that each link leverages sufficiently distinct spread code sequences.
 
