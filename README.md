@@ -1,8 +1,6 @@
-## Inter-process or cross-VM data exchange via CPU load modulation
+# Inter-process or cross-VM data exchange via CPU load modulation
 
-### What is this
-
-This is not a vulnerability and, generally, not an infosec threat on its own.
+## What is this
 
 I made this PoC as a visual aid for an online discussion about [M1RACLES](https://m1racles.com/) ---
 a method of covert inter-process data exchange via a system register in Apple M1.
@@ -12,7 +10,7 @@ which can be exploited for covert data exchange (proper modulation provided).
 
 In the best spirit of "[someone is wrong on the internet](https://xkcd.com/386/)", I made this demo to prove the point.
 
-### Principle
+## Principle
 
 This PoC demonstrates a straightforward side-channel that allows one to construct reasonably robust
 data links between multiple processes, possibly executed in different virtualized environments,
@@ -53,10 +51,17 @@ the boundaries of virtualized environments.
 The speed vs. bit error rate trade-off can be adjusted by updating the chip period and the code length
 defined in the header file.
 
-### Demo
+## Demo
 
 [![video](https://img.youtube.com/vi/PIUOHklFjrQ/maxresdefault.jpg)](https://youtu.be/PIUOHklFjrQ)
 
-### Building
+## Building
 
 The build instructions are given at the top of each file.
+
+## Links
+
+Online discussions of this work:
+
+- https://www.reddit.com/r/netsec/comments/nokpa4/trivial_file_transfer_between_separate_vms/
+- [Russian] https://habr.com/ru/post/560508/
